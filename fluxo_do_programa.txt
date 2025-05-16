@@ -1,0 +1,60 @@
+1. Registrar Fatura
+Seleciona o PDF da fatura.
+
+Informa o caminho da pasta do cliente/mês.
+
+Preenche os campos:
+
+Descrição
+
+Valor
+
+O arquivo é salvo como:
+descricao_valor.pdf
+
+2. Registrar Comprovante
+Informa o mesmo caminho (cliente/mês).
+
+Programa lista faturas sem comprovante vinculado (ou seja, com nome sem _dd-MM-yyyy).
+
+Usuário seleciona uma fatura da lista.
+
+Seleciona o comprovante (PDF).
+
+Informa a data de pagamento.
+
+O programa:
+
+Consolida os dois PDFs (fatura + comprovante).
+
+Salva como: descricao_valor_dd-MM-yyyy.pdf
+
+Apaga o arquivo do comprovante original.
+
+3. Comportamento Esperado da Classe "Gerar Reembolso"
+1. Seleção da pasta:
+O usuário seleciona uma pasta contendo arquivos PDF.
+
+2. Leitura e filtragem dos arquivos:
+O programa varre todos os arquivos na pasta selecionada, considerando somente aqueles no formato de nome:
+descricao_valor_dd-MM-yyyy.pdf
+
+3. Extração de dados do nome do arquivo:
+Para cada arquivo identificado, o programa deve extrair:
+
+Descrição (parte inicial do nome do arquivo)
+
+Valor (numérico, extraído do nome do arquivo)
+
+Data de pagamento (formato dd-MM-yyyy)
+
+4. Geração da planilha Excel:
+Com os dados extraídos, o programa cria uma planilha Excel com layout fixo, baseado em um modelo previamente definido.
+
+5. Geração do PDF da planilha:
+O programa converte a planilha Excel em PDF.
+O usuário deve informar o nome do arquivo PDF gerado.
+
+6. Consolidação dos PDFs:
+O programa consolida todos os PDFs (no formato descricao_valor_dd-MM-yyyy.pdf) presentes na pasta selecionada em um único arquivo PDF, ordenando-os pela data de pagamento.
+O usuário informa o nome do arquivo PDF consolidado.

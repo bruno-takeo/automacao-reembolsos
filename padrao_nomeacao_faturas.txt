@@ -1,0 +1,6 @@
+/pasta-mes
+├── f1_descricao_valor=14.90.pdf
+├── fatura2_valor=26.54.pdf
+├── comprovante1_03-02-2025.pdf
+├── comprovante2_03-02-2025.pdf
+...

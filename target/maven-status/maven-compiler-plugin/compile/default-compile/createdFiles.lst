@@ -1,4 +1,8 @@
-com\meuprojeto\SecondaryController.class
+com\meuprojeto\util\EmailSender$1.class
 com\meuprojeto\App.class
+com\meuprojeto\util\PdfMerger.class
 com\meuprojeto\PrimaryController.class
-module-info.class
+com\meuprojeto\SecondaryController.class
+com\meuprojeto\ui\InterfaceSeletor.class
+com\meuprojeto\util\EmailSender.class
+com\meuprojeto\util\ExcelToPdfConverter.class

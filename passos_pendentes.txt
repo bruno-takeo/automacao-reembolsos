@@ -1,0 +1,8 @@
+requisições:
+O computador precisa ter o LibreOffice para que a conversão de excel para pdf possa ser feita.
+
+implementação:
+classe RegistrarComprovanteFrame -> usar como base classe RegistrarFaturaFrame
+
+classe para gerar planilha excel, transformar essa planilha em pdf e consolidar todos os pfs's
+fatura+comprovante em um único arquivo pdf
