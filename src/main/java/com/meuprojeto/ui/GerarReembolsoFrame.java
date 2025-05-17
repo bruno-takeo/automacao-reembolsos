@@ -22,9 +22,9 @@ public class GerarReembolsoFrame extends JFrame {
     public GerarReembolsoFrame(JFrame menuPrincipal) {
         setTitle("Gerar Reembolso");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(600, 250);
+        setSize(600, 300);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(6, 1, 5, 5));
+        setLayout(new GridLayout(8, 1, 5, 5)); // Aumentado para acomodar botão voltar
 
         JButton selecionarPastaBtn = new JButton("Selecionar Pasta");
         selecionarPastaBtn.addActionListener(e -> selecionarPasta());
@@ -34,6 +34,20 @@ public class GerarReembolsoFrame extends JFrame {
         JButton gerarBtn = new JButton("Gerar Reembolso");
         gerarBtn.addActionListener(e -> gerarReembolso());
 
+        JButton voltarBtn = new JButton("Voltar");
+        voltarBtn.addActionListener(e -> {
+            this.dispose();
+            menuPrincipal.setVisible(true);
+        });
+
+        // Garantir que ao fechar no X, o menu também reabra
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                menuPrincipal.setVisible(true);
+            }
+        });
+
         add(selecionarPastaBtn);
         add(pastaField);
         add(new JLabel("Nome do PDF da planilha gerada:"));
@@ -41,6 +55,7 @@ public class GerarReembolsoFrame extends JFrame {
         add(new JLabel("Nome do PDF consolidado:"));
         add(nomePDFConsolidadoField);
         add(gerarBtn);
+        add(voltarBtn);
     }
 
     private void selecionarPasta() {
@@ -107,7 +122,7 @@ public class GerarReembolsoFrame extends JFrame {
             merger.mergeDocuments(null);
 
             JOptionPane.showMessageDialog(this, "Reembolso gerado com sucesso!");
-            this.dispose();
+            
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao gerar reembolso.");
@@ -115,48 +130,53 @@ public class GerarReembolsoFrame extends JFrame {
     }
 
     private void gerarPlanilhaExcel(File arquivoSaida, List<ReembolsoInfo> infos) throws IOException {
-    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-    int linhaInicial = 6;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        int linhaInicial = 10;
 
-    try (InputStream modeloStream = getClass().getClassLoader().getResourceAsStream("com/meuprojeto/layout_preenchimento.xlsx");
-         Workbook workbook = new XSSFWorkbook(modeloStream)) {
+        try (InputStream modeloStream = getClass().getClassLoader().getResourceAsStream("com/meuprojeto/layout_preenchimento.xlsx");
+             Workbook workbook = new XSSFWorkbook(modeloStream)) {
 
-        if (modeloStream == null) {
-            throw new FileNotFoundException("Modelo de planilha 'layout_preenchimento.xlsx' não encontrado no classpath.");
-        }
-
-        Sheet sheet = workbook.getSheetAt(0);
-        infos.sort(Comparator.comparing(r -> r.dataPagamento));
-
-        for (int i = 0; i < infos.size(); i++) {
-            ReembolsoInfo info = infos.get(i);
-            Row row = sheet.getRow(linhaInicial + i);
-            if (row == null) row = sheet.createRow(linhaInicial + i);
-
-            Cell cellDescricao = row.getCell(0);
-            if (cellDescricao == null) cellDescricao = row.createCell(0);
-            cellDescricao.setCellValue(info.descricao);
-
-            Cell cellValor = row.getCell(1);
-            if (cellValor == null) cellValor = row.createCell(1);
-            try {
-                cellValor.setCellValue(Double.parseDouble(info.valor.replace(",", ".")));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Valor inválido no arquivo: " + info.arquivo.getName(), e);
+            if (modeloStream == null) {
+                throw new FileNotFoundException("Modelo de planilha 'layout_preenchimento.xlsx' não encontrado no classpath.");
             }
 
-            Cell cellData = row.getCell(2);
-            if (cellData == null) cellData = row.createCell(2);
-            cellData.setCellValue(sdf.format(info.dataPagamento));
-        }
+            Sheet sheet = workbook.getSheetAt(0);
+            infos.sort(Comparator.comparing(r -> r.dataPagamento));
 
-        try (FileOutputStream fos = new FileOutputStream(arquivoSaida)) {
-            workbook.write(fos);
-        }
+            for (int i = 0; i < infos.size(); i++) {
+                ReembolsoInfo info = infos.get(i);
+                Row row = sheet.getRow(linhaInicial + i);
+                if (row == null) row = sheet.createRow(linhaInicial + i);
 
+                Cell cellData = row.getCell(0);
+                if (cellData == null) cellData = row.createCell(0);
+                cellData.setCellValue(sdf.format(info.dataPagamento));
+
+                Cell cellDescricao = row.getCell(1);
+                if (cellDescricao == null) cellDescricao = row.createCell(1);
+                cellDescricao.setCellValue(info.descricao);
+
+                Cell cellValor = row.getCell(2);
+                if (cellValor == null) cellValor = row.createCell(2);
+                try {
+                    cellValor.setCellValue(Double.parseDouble(info.valor.replace(",", ".")));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Valor inválido no arquivo: " + info.arquivo.getName(), e);
+                }
+                
+            }
+
+            //Força avaliação das fórmulas manualmente antes de salvar, garantido que o PDF contenha a soma da coluna "Valor"
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            evaluator.evaluateAll();
+            //força o Excel a recalcular as fórmulas contida na planilha, útil para mater o arquivo excel com as formulas aplicadas
+            workbook.setForceFormulaRecalculation(true);
+
+            try (FileOutputStream fos = new FileOutputStream(arquivoSaida)) {
+                workbook.write(fos);
+            }
+        }
     }
-}
-
 
     private static class ReembolsoInfo {
         String descricao;
