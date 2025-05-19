@@ -9,38 +9,47 @@ public class MenuPrincipalFrame extends JFrame {
     public MenuPrincipalFrame() {
         setTitle("Menu Principal");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 250);
+        setSize(400, 300);
         setLocationRelativeTo(null);
 
-        JPanel contentPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        // Painel principal com espaçamento
+        JPanel contentPanel = new JPanel(new GridLayout(4, 1, 10, 10));
         contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
+        // Botões
         JButton registrarFaturaBtn = new JButton("Registrar Fatura");
         JButton registrarComprovanteBtn = new JButton("Registrar Comprovante");
         JButton gerarReembolsoBtn = new JButton("Gerar Reembolso");
+        JButton cadastroClienteBtn = new JButton("Cadastro de Cliente");
 
+        // Ações dos botões
         registrarFaturaBtn.addActionListener(e -> {
             this.setVisible(false);
-            RegistrarFaturaFrame faturaFrame = new RegistrarFaturaFrame(this);
-            faturaFrame.setVisible(true);
+            new RegistrarFaturaFrame(this).setVisible(true);
         });
 
         registrarComprovanteBtn.addActionListener(e -> {
             this.setVisible(false);
-            RegistrarComprovanteFrame comprovanteFrame = new RegistrarComprovanteFrame(this);
-            comprovanteFrame.setVisible(true);
+            new RegistrarComprovanteFrame(this).setVisible(true);
         });
 
         gerarReembolsoBtn.addActionListener(e -> {
             this.setVisible(false);
-            GerarReembolsoFrame reembolsoFrame = new GerarReembolsoFrame(this);
-            reembolsoFrame.setVisible(true);
+            new GerarReembolsoFrame(this).setVisible(true);
         });
 
+        cadastroClienteBtn.addActionListener(e -> {
+            this.setVisible(false);
+            new CadastroClienteFrame(this).setVisible(true);
+        });
+
+        // Adiciona os botões ao painel
         contentPanel.add(registrarFaturaBtn);
         contentPanel.add(registrarComprovanteBtn);
         contentPanel.add(gerarReembolsoBtn);
+        contentPanel.add(cadastroClienteBtn);
 
+        // Define o painel como conteúdo da janela
         setContentPane(contentPanel);
     }
 }
