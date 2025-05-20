@@ -1,9 +1,11 @@
 package com.meuprojeto.ui;
 
-import com.meuprojeto.util.ArquivoUtil;
-import com.meuprojeto.util.ExcelUtil;
+import com.meuprojeto.model.ClienteReembolso;
 import com.meuprojeto.model.ReembolsoInfo;
 import com.meuprojeto.service.ReembolsoService;
+import com.meuprojeto.util.ArquivoUtil;
+import com.meuprojeto.util.ClienteUtil;
+import com.meuprojeto.util.ExcelUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,69 +14,128 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.List;
 
-
 public class GerarReembolsoFrame extends JFrame {
 
-    private final JButton selecionarPastaButton;
+    private final JButton selecionarClienteButton;
+    private final JButton selecionarDiretorioButton;
     private final JTextField pastaTextField;
+    private final JTextField nomePlanilhaPdfField;
+    private final JTextField nomeReembolsoPdfField;
     private final JButton gerarButton;
     private final MenuPrincipalFrame menuPrincipal;
+
+    private File pastaSelecionada;
+    private ClienteReembolso clienteSelecionado;
 
     public GerarReembolsoFrame(MenuPrincipalFrame menuPrincipal) {
         this.menuPrincipal = menuPrincipal;
 
         setTitle("Gerador de Reembolso");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 150);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setSize(700, 250);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Faz o menu principal reaparecer quando esta janela for fechada
-    addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosed(java.awt.event.WindowEvent e) {
-            menuPrincipal.setVisible(true);
-        }
-    });
-    
-        JPanel panel = new JPanel(new FlowLayout());
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                menuPrincipal.setVisible(true);
+            }
+        });
 
-        pastaTextField = new JTextField(30);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JPanel caminhoPanel = new JPanel(new FlowLayout());
+        pastaTextField = new JTextField(35);
         pastaTextField.setEditable(false);
 
-        selecionarPastaButton = new JButton("Selecionar Pasta");
-        selecionarPastaButton.addActionListener(this::selecionarPasta);
+        selecionarClienteButton = new JButton("Selecionar Cliente");
+        selecionarClienteButton.addActionListener(this::selecionarCliente);
+
+        selecionarDiretorioButton = new JButton("Selecionar Pasta Manualmente");
+        selecionarDiretorioButton.addActionListener(this::selecionarDiretorio);
+
+        caminhoPanel.add(new JLabel("Pasta:"));
+        caminhoPanel.add(pastaTextField);
+        caminhoPanel.add(selecionarClienteButton);
+        caminhoPanel.add(selecionarDiretorioButton);
+
+        JPanel nomeArquivosPanel = new JPanel(new FlowLayout());
+        nomePlanilhaPdfField = new JTextField("planilha.pdf", 15);
+        nomeReembolsoPdfField = new JTextField("reembolso_final.pdf", 15);
+
+        nomeArquivosPanel.add(new JLabel("Nome da planilha PDF:"));
+        nomeArquivosPanel.add(nomePlanilhaPdfField);
+        nomeArquivosPanel.add(new JLabel("Nome do PDF final:"));
+        nomeArquivosPanel.add(nomeReembolsoPdfField);
 
         gerarButton = new JButton("Gerar Reembolso");
         gerarButton.addActionListener(this::gerarReembolso);
 
-        panel.add(new JLabel("Pasta:"));
-        panel.add(pastaTextField);
-        panel.add(selecionarPastaButton);
-        panel.add(gerarButton);
+        JPanel botaoPanel = new JPanel(new FlowLayout());
+        botaoPanel.add(gerarButton);
+
+        panel.add(caminhoPanel);
+        panel.add(nomeArquivosPanel);
+        panel.add(botaoPanel);
 
         add(panel, BorderLayout.CENTER);
     }
 
-    private void selecionarPasta(ActionEvent e) {
+    private void selecionarCliente(ActionEvent e) {
+        ClienteReembolso selecionado = ClienteUtil.selecionarCliente(this);
+        if (selecionado != null) {
+            this.clienteSelecionado = selecionado;
+
+            JFileChooser chooser = new JFileChooser(new File(clienteSelecionado.getCaminhoBase()));
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+            int resultado = chooser.showOpenDialog(this);
+            if (resultado == JFileChooser.APPROVE_OPTION) {
+                File escolhido = chooser.getSelectedFile();
+                // Valida se está dentro do diretório do cliente
+                if (!escolhido.getAbsolutePath().startsWith(clienteSelecionado.getCaminhoBase())) {
+                    JOptionPane.showMessageDialog(this, "A pasta selecionada deve estar dentro do diretório do cliente.");
+                    return;
+                }
+
+                this.pastaSelecionada = escolhido;
+                pastaTextField.setText(escolhido.getAbsolutePath());
+            }
+        }
+    }
+
+    private void selecionarDiretorio(ActionEvent e) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         int resultado = fileChooser.showOpenDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
-            File pastaSelecionada = fileChooser.getSelectedFile();
+            this.pastaSelecionada = fileChooser.getSelectedFile();
+            this.clienteSelecionado = null; // reset
             pastaTextField.setText(pastaSelecionada.getAbsolutePath());
         }
     }
 
     private void gerarReembolso(ActionEvent e) {
-        try {
-            File pastaSelecionada = new File(pastaTextField.getText());
-            if (!pastaSelecionada.exists() || !pastaSelecionada.isDirectory()) {
-                JOptionPane.showMessageDialog(this, "Selecione uma pasta válida.");
-                return;
-            }
+        if (pastaSelecionada == null || !pastaSelecionada.exists() || !pastaSelecionada.isDirectory()) {
+            JOptionPane.showMessageDialog(this, "Selecione um cliente ou diretório válido.");
+            return;
+        }
 
+        String nomePlanilha = nomePlanilhaPdfField.getText().trim();
+        String nomeReembolso = nomeReembolsoPdfField.getText().trim();
+
+        if (!nomePlanilha.toLowerCase().endsWith(".pdf")) {
+            nomePlanilha += ".pdf";
+        }
+
+        if (!nomeReembolso.toLowerCase().endsWith(".pdf")) {
+            nomeReembolso += ".pdf";
+        }
+
+        try {
             List<ReembolsoInfo> infos = ReembolsoService.lerArquivosValidos(pastaSelecionada);
             if (infos.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Nenhum arquivo válido encontrado.");
@@ -82,8 +143,8 @@ public class GerarReembolsoFrame extends JFrame {
             }
 
             File excelTemp = new File(pastaSelecionada, "planilha-temp.xlsx");
-            File planilhaPDF = new File(pastaSelecionada, "planilha.pdf");
-            File novoPDF = new File(pastaSelecionada, "reembolso_final.pdf");
+            File planilhaPDF = new File(pastaSelecionada, nomePlanilha);
+            File novoPDF = new File(pastaSelecionada, nomeReembolso);
 
             ExcelUtil.gerarPlanilhaExcel(excelTemp, infos);
             ArquivoUtil.converterExcelParaPDFComLibreOffice(excelTemp, planilhaPDF);
