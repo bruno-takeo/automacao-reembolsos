@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.EmptyBorder;
 
+
 public class MenuPrincipalFrame extends JFrame {
 
     public MenuPrincipalFrame() {
