@@ -12,9 +12,9 @@ import java.util.List;
 
 public class ExcelUtil {
 
-    public static void gerarPlanilhaExcel(File arquivoSaida, List<ReembolsoInfo> infos) throws IOException {
+    public static void gerarPlanilhaExcel(File arquivoSaida, List<ReembolsoInfo> infos, String nomeEmpresa, String periodo) throws IOException {
         int linhaInicial = 10;
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         try (InputStream modeloStream = ExcelUtil.class.getClassLoader()
                 .getResourceAsStream("com/meuprojeto/layout_preenchimento.xlsx")) {
@@ -26,9 +26,22 @@ public class ExcelUtil {
             try (Workbook workbook = new XSSFWorkbook(modeloStream)) {
                 Sheet sheet = workbook.getSheetAt(0);
 
+                // B6 - Empresa
+                Row rowEmpresa = sheet.getRow(6); // Linha 6
+                if (rowEmpresa == null) rowEmpresa = sheet.createRow(6);
+                Cell cellEmpresa = rowEmpresa.getCell(1); // Coluna B (índice 1)
+                if (cellEmpresa == null) cellEmpresa = rowEmpresa.createCell(1);
+                cellEmpresa.setCellValue(nomeEmpresa != null ? nomeEmpresa : "");
+
+                // B7 - Período
+                Row rowPeriodo = sheet.getRow(7); // Linha 7
+                if (rowPeriodo == null) rowPeriodo = sheet.createRow(7);
+                Cell cellPeriodo = rowPeriodo.getCell(1); // Coluna B (índice 1)
+                if (cellPeriodo == null) cellPeriodo = rowPeriodo.createCell(1);
+                cellPeriodo.setCellValue(periodo != null ? periodo : "");
+
                 preencherPlanilhaComReembolsos(sheet, infos, linhaInicial, sdf);
 
-                // Forçar avaliação de fórmulas
                 FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
                 evaluator.evaluateAll();
                 workbook.setForceFormulaRecalculation(true);
@@ -39,6 +52,7 @@ public class ExcelUtil {
             }
         }
     }
+
 
     private static void preencherPlanilhaComReembolsos(Sheet sheet, List<ReembolsoInfo> infos, int linhaModeloIndex, SimpleDateFormat sdf) {
         infos.sort(Comparator.comparing(r -> r.dataPagamento));

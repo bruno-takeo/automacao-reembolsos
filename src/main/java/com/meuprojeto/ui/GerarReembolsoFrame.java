@@ -23,6 +23,7 @@ public class GerarReembolsoFrame extends JFrame {
     private final JTextField nomeReembolsoPdfField;
     private final JButton gerarButton;
     private final MenuPrincipalFrame menuPrincipal;
+    private final JTextField periodoField;
 
     private File pastaSelecionada;
     private ClienteReembolso clienteSelecionado;
@@ -64,11 +65,14 @@ public class GerarReembolsoFrame extends JFrame {
         JPanel nomeArquivosPanel = new JPanel(new FlowLayout());
         nomePlanilhaPdfField = new JTextField("planilha.pdf", 15);
         nomeReembolsoPdfField = new JTextField("reembolso_final.pdf", 15);
+        periodoField = new JTextField(15);
 
         nomeArquivosPanel.add(new JLabel("Nome da planilha PDF:"));
         nomeArquivosPanel.add(nomePlanilhaPdfField);
         nomeArquivosPanel.add(new JLabel("Nome do PDF final:"));
         nomeArquivosPanel.add(nomeReembolsoPdfField);
+        nomeArquivosPanel.add(new JLabel("Período:"));
+        nomeArquivosPanel.add(periodoField);
 
         gerarButton = new JButton("Gerar Reembolso");
         gerarButton.addActionListener(this::gerarReembolso);
@@ -146,7 +150,9 @@ public class GerarReembolsoFrame extends JFrame {
             File planilhaPDF = new File(pastaSelecionada, nomePlanilha);
             File novoPDF = new File(pastaSelecionada, nomeReembolso);
 
-            ExcelUtil.gerarPlanilhaExcel(excelTemp, infos);
+            String nomeEmpresa = clienteSelecionado != null ? clienteSelecionado.getNomeEmpresa() : "";
+            String periodoInformado = periodoField.getText().trim();
+            ExcelUtil.gerarPlanilhaExcel(excelTemp, infos, nomeEmpresa, periodoInformado);
             ArquivoUtil.converterExcelParaPDFComLibreOffice(excelTemp, planilhaPDF);
             ReembolsoService.consolidarPDFsOrdenados(infos, novoPDF);
 

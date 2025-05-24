@@ -170,4 +170,13 @@ public class RegistrarComprovanteFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Erro ao registrar o comprovante.");
         }
     }
+
+    public JComboBox<String> getFaturasComboBox() {
+        return faturasComboBox;
+    }
+
+    public SelecionarClienteOuDiretorioPanel getSelecionarPanel() {
+        return selecionarPanel;
+    }
+
 }

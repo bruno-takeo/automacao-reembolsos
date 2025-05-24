@@ -11,8 +11,8 @@ public class SelecionarClienteOuDiretorioPanel extends JPanel {
 
     private final JTextField pastaTextField;
     private final JButton selecionarClienteButton;
-    private final JButton selecionarDiretorioButton;
-
+    //private final JButton selecionarDiretorioButton;
+    
     private File pastaSelecionada;
     private ClienteReembolso clienteSelecionado;
 
@@ -27,13 +27,13 @@ public class SelecionarClienteOuDiretorioPanel extends JPanel {
         selecionarClienteButton = new JButton("Selecionar Cliente");
         selecionarClienteButton.addActionListener(e -> selecionarCliente(parentFrame));
 
-        selecionarDiretorioButton = new JButton("Selecionar Pasta Manualmente");
-        selecionarDiretorioButton.addActionListener(e -> selecionarDiretorio(parentFrame));
+        //selecionarDiretorioButton = new JButton("Selecionar Pasta Manualmente");
+        //selecionarDiretorioButton.addActionListener(e -> selecionarDiretorio(parentFrame));
 
         this.add(new JLabel("Pasta:"));
         this.add(pastaTextField);
         this.add(selecionarClienteButton);
-        this.add(selecionarDiretorioButton);
+        //this.add(selecionarDiretorioButton);
     }
 
     public void setSelecaoListener(SelecaoListener listener) {
@@ -96,4 +96,19 @@ public class SelecionarClienteOuDiretorioPanel extends JPanel {
         pastaTextField.setText("");
         notificarSelecao(null);
     }
+
+    public void setDiretorioInicial(File diretorio) {
+        this.pastaSelecionada = diretorio;
+        pastaTextField.setText(diretorio != null ? diretorio.getAbsolutePath() : "");
+        notificarSelecao(diretorio);
+    }
+
+
+    public void forcarSelecaoDiretorio(File diretorio) {
+        if (selecaoListener != null && diretorio != null && diretorio.exists()) {
+            selecaoListener.aoSelecionarPasta(diretorio);
+        }
+    }
+
+
 }
