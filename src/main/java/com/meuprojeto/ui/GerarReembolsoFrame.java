@@ -33,7 +33,7 @@ public class GerarReembolsoFrame extends JFrame {
 
         setTitle("Gerador de Reembolso");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(700, 250);
+        setSize(650, 250);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 

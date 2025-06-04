@@ -2,6 +2,7 @@ package com.meuprojeto.ui;
 
 import javax.swing.*;
 import com.meuprojeto.util.ArquivoUtil;
+import com.meuprojeto.util.VisualizadorPDF;
 import com.meuprojeto.model.ClienteReembolso;
 
 import java.awt.*;
@@ -44,7 +45,7 @@ public class RegistrarComprovanteFrame extends JFrame {
 
         setSize(600, 470);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(11, 1, 5, 5)); // +1 linha para o nome do cliente
+        setLayout(new GridLayout(12, 1, 5, 5)); // +1 linha para o nome do cliente
 
         selecionarPanel = new SelecionarClienteOuDiretorioPanel(this);
 
@@ -72,6 +73,10 @@ public class RegistrarComprovanteFrame extends JFrame {
         JButton selecionarComprovanteBtn = new JButton("Selecionar Comprovante (PDF)");
         selecionarComprovanteBtn.addActionListener(e -> selecionarComprovante());
 
+        JButton visualizarComprovanteBtn = new JButton("Visualizar Comprovante");
+        visualizarComprovanteBtn.addActionListener(e -> VisualizadorPDF.visualizarPDF(this, comprovanteSelecionado));
+
+
         dataPagamentoField = new JTextField();
 
         destinoField = new JTextField();
@@ -89,6 +94,7 @@ public class RegistrarComprovanteFrame extends JFrame {
         });
 
         add(selecionarComprovanteBtn);
+        add(visualizarComprovanteBtn);
         comprovanteSelecionadoLabel = new JLabel("Nenhum comprovante selecionado.");
         comprovanteSelecionadoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         add(comprovanteSelecionadoLabel);

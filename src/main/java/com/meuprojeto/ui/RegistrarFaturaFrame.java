@@ -2,6 +2,7 @@ package com.meuprojeto.ui;
 
 import javax.swing.*;
 import com.meuprojeto.util.ArquivoUtil;
+import com.meuprojeto.util.VisualizadorPDF;
 
 import java.awt.*;
 import java.io.File;
@@ -38,7 +39,7 @@ public class RegistrarFaturaFrame extends JFrame {
 
         setSize(600, 500);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(11, 1, 5, 5)); // +1 linha para novo botão
+        setLayout(new GridLayout(12, 1, 5, 5)); // +1 linha para novo botão
 
         selecionarPanel = new SelecionarClienteOuDiretorioPanel(this);
         selecionarPanel.setSelecaoListener(pasta -> {
@@ -54,6 +55,9 @@ public class RegistrarFaturaFrame extends JFrame {
 
         JButton selecionarFaturaBtn = new JButton("Selecionar Fatura (PDF)");
         selecionarFaturaBtn.addActionListener(e -> selecionarFatura());
+
+        JButton visualizarFaturaBtn = new JButton("Visualizar Fatura");
+        visualizarFaturaBtn.addActionListener(e -> VisualizadorPDF.visualizarPDF(this, faturaSelecionada));
 
         descricaoField = new JTextField();
         valorField = new JTextField();
@@ -75,6 +79,7 @@ public class RegistrarFaturaFrame extends JFrame {
         });
 
         add(selecionarFaturaBtn);
+        add(visualizarFaturaBtn);
         faturaSelecionadaLabel = new JLabel("Nenhuma fatura selecionada.");
         faturaSelecionadaLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         add(faturaSelecionadaLabel);
